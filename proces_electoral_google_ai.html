@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proceso Electoral Federal — Flujo Completo (Corregido)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Outfit:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --bg: #06080f;
+  --surface: #0c0f1a;
+  --card: #111828;
+  --border: #1a2235;
+  --text: #dde4f5;
+  --muted: #4a5678;
+  --dim: #2a3450;
+
+  /* Stage colors */
+  --c0: #8b5cf6;   /* inicio */
+  --c1: #3b82f6;   /* preparacion */
+  --c2: #10b981;   /* jornada */
+  --c3: #f59e0b;   /* escrutinio */
+  --c4: #ef4444;   /* computo */
+  --c5: #ec4899;   /* resultados */
+  --c6: #06b6d4;   /* validez */
+
+  /* Actor colors */
+  --a-cg: #fbbf24;
+  --a-jde: #818cf8;
+  --a-jde-dist: #fb923c;
+  --a-cd: #34d399;
+  --a-casilla: #a78bfa;
+  --a-ciudadano: #38bdf8;
+  --a-partido: #f472b6;
+  --a-tepjf: #f87171;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+}
+
+/* HEADER */
+header {
+  background: linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(59,130,246,0.08) 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 1.5rem 2rem 1rem;
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(10px);
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem; }
+header h1 { font-size: clamp(1.1rem, 3vw, 1.7rem); font-weight: 800; color: #fff; }
+header h1 span { color: var(--c0); }
+.header-sub { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.15em; margin-top: 0.2rem; }
+
+/* NAV PILLS */
+.stage-nav {
+  display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.8rem;
+}
+.snav-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.58rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.3rem 0.7rem; border-radius: 20px;
+  border: 1px solid; cursor: pointer;
+  transition: all 0.15s;
+}
+.snav-btn:hover, .snav-btn.active { filter: brightness(1.3); }
+
+/* ACTOR LEGEND */
+.actor-legend {
+  display: flex; flex-wrap: wrap; gap: 0.4rem 1rem;
+  padding: 0.6rem 2rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.3);
+}
+.al-item {
+  display: flex; align-items: center; gap: 0.3rem;
+  font-size: 0.62rem; color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+.al-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* MAIN LAYOUT */
+.main {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: calc(100vh - 120px);
+}
+
+/* SIDEBAR */
+.sidebar {
+  border-right: 1px solid var(--border);
+  padding: 1rem 0;
+  position: sticky; top: 80px;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+.sidebar-stage {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+.sidebar-stage:hover { background: rgba(255,255,255,0.03); }
+.sidebar-stage.active { background: rgba(255,255,255,0.05); }
+.ss-label { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 0.2rem; }
+.ss-name { font-size: 0.8rem; font-weight: 600; color: #fff; }
+.ss-date { font-size: 0.6rem; color: var(--muted); margin-top: 0.15rem; font-family: 'JetBrains Mono', monospace; }
+
+/* CONTENT */
+.content { overflow-y: auto; padding: 1.5rem 2rem; }
+
+/* STAGE SECTION */
+.stage-section {
+  margin-bottom: 2.5rem;
+  scroll-margin-top: 90px;
+}
+.stage-header {
+  display: flex; align-items: center; gap: 0.8rem;
+  margin-bottom: 1rem; padding-bottom: 0.6rem;
+  border-bottom: 2px solid;
+}
+.stage-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+  font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 3px;
+}
+.stage-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.1rem; color: #fff; }
+.stage-period { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+/* ACTIVITY GRID */
+.activity-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+
+/* ACTIVITY CARD */
+.act-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.15s;
+}
+.act-card:hover { border-color: var(--dim); transform: translateX(3px); }
+
+.act-header {
+  display: flex; align-items: stretch; gap: 0;
+  cursor: pointer;
+}
+.act-stripe { width: 4px; flex-shrink: 0; }
+.act-main { flex: 1; padding: 0.65rem 0.9rem; }
+.act-top { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.act-date {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  font-weight: 600; letter-spacing: 0.08em;
+  padding: 0.15rem 0.5rem; border-radius: 3px;
+  background: rgba(255,255,255,0.06);
+  white-space: nowrap;
+}
+.act-title { font-weight: 600; font-size: 0.82rem; color: #fff; flex: 1; }
+.act-actors { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.35rem; }
+.actor-tag {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.5rem;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 0.1rem 0.4rem; border-radius: 2px;
+  border: 1px solid;
+}
+.act-toggle { padding: 0.65rem 0.7rem; display: flex; align-items: center; color: var(--muted); font-size: 0.7rem; transition: color 0.15s; }
+.act-card:hover .act-toggle { color: var(--text); }
+
+/* DETAIL PANEL */
+.act-detail {
+  display: none;
+  padding: 0 0.9rem 0.8rem 1.3rem;
+  border-top: 1px solid var(--border);
+}
+.act-detail.open { display: block; }
+
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.8rem; margin-top: 0.6rem; }
+
+.detail-block {
+  background: rgba(255,255,255,0.02);
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+}
+.db-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 0.4rem;
+  padding-bottom: 0.25rem; border-bottom: 1px solid var(--border);
+}
+.db-list { list-style: none; }
+.db-list li {
+  font-size: 0.72rem; padding: 0.2rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  display: flex; gap: 0.3rem; align-items: flex-start;
+  color: var(--text); line-height: 1.4;
+}
+.db-list li::before { content: '›'; color: var(--muted); flex-shrink: 0; }
+.db-list li.key { color: #fff; font-weight: 500; }
+.db-list li.key::before { content: '★'; font-size: 0.5rem; color: inherit; }
+.db-list li.law { color: var(--muted); font-size: 0.65rem; font-family: 'JetBrains Mono', monospace; }
+.db-list li.law::before { content: '§'; color: var(--muted); }
+
+/* FLOW ARROW */
+.flow-connector {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.25rem 0 0.25rem 0.5rem;
+  margin: 0.2rem 0;
+}
+.flow-line {
+  flex: 1; height: 1px;
+  background: repeating-linear-gradient(90deg, var(--border) 0, var(--border) 4px, transparent 4px, transparent 8px);
+}
+.flow-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  letter-spacing: 0.1em; color: var(--muted);
+  padding: 0.15rem 0.4rem; border-radius: 3px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+/* TIMELINE BAR */
+.timeline-overview {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 2rem;
+}
+.tl-title { font-size: 0.65rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.8rem; }
+.tl-bar {
+  display: flex; height: 28px; border-radius: 5px; overflow: hidden;
+  gap: 1px;
+}
+.tl-seg {
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.5rem;
+  font-weight: 700; letter-spacing: 0.05em;
+  cursor: pointer; transition: filter 0.15s;
+  text-align: center; padding: 0 0.3rem;
+  white-space: nowrap; overflow: hidden;
+}
+.tl-seg:hover { filter: brightness(1.3); }
+.tl-months { display: flex; margin-top: 0.3rem; font-family: 'JetBrains Mono', monospace; font-size: 0.52rem; color: var(--muted); justify-content: space-between; padding: 0 2px; }
+
+/* Actor color classes */
+.a-cg { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.4); color: var(--a-cg); }
+.a-jl { background: rgba(129,140,248,0.12); border-color: rgba(129,140,248,0.4); color: var(--a-jde); }
+.a-jd { background: rgba(251,146,60,0.12); border-color: rgba(251,146,60,0.4); color: var(--a-jde-dist); }
+.a-cd { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.4); color: var(--a-cd); }
+.a-cas { background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.4); color: var(--a-casilla); }
+.a-ciu { background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.4); color: var(--a-ciudadano); }
+.a-par { background: rgba(244,114,182,0.12); border-color: rgba(244,114,182,0.4); color: var(--a-partido); }
+.a-tep { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.4); color: var(--a-tepjf); }
+.a-cl { background: rgba(129,140,248,0.12); border-color: rgba(129,140,248,0.3); color: #a5b4fc; }
+.a-prep { background: rgba(6,182,212,0.12); border-color: rgba(6,182,212,0.4); color: var(--c6); }
+
+@media (max-width: 700px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .content { padding: 1rem; }
+}
+
+/* Scroll bar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <h1>Proceso Electoral <span>Federal</span> — Flujo Completo</h1>
+      <div class="header-sub">LGIPE · Reglamento de Elecciones · Art. 207-320 · Basado en fuentes oficiales INE 2024-2025</div>
+    </div>
+  </div>
+  <div class="stage-nav" id="stageNav"></div>
+</header>
+
+<div class="actor-legend">
+  <div class="al-item"><div class="al-dot" style="background:var(--a-cg)"></div>Consejo General</div>
+  <div class="al-item"><div class="al-dot" style="background:var(--a-jde)"></div>Junta Local</div>
+  <div class="al-item"><div class="al-dot" style="background:var(--a-jde-dist)"></div>Junta Distrital</div>
+  <div class="al-item"><div class="al-dot" style="background:var(--a-cd)"></div>Consejo Distrital</div>
+  <div class="al-item"><div class="al-dot" style="background:var(--a-casilla)"></div>Mesa Directiva Casilla</div>
+  <div class="al-item"><div class="al-dot" style="background:var(--a-ciudadano)"></div>Ciudadano/Elector</div>
+  <div class="al-item"><div class="al-dot" style="background:var(--a-partido)"></div>Partidos Políticos</div>
+  <div class="al-item"><div class="al-dot" style="background:var(--a-tepjf)"></div>TEPJF</div>
+</div>
+
+<div class="main">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// DATA — Proceso Electoral Federal completo
+// ══════════════════════════════════════════════════════════════
+const stages =[
+{
+  id: 'inicio', color: '#8b5cf6', num: '00',
+  title: 'Inicio del Proceso Electoral',
+  period: 'Septiembre — año previo a la elección',
+  dateLabel: 'SEP · AÑO PREVIO',
+  activities:[
+    {
+      id: 'cai',
+      date: '1 Sep — 15 Dic (año previo)',
+      title: 'Campaña Anual Intensa (CAI)',
+      actors:['a-jd', 'a-ciu'],
+      actorLabels: ['Junta Distrital', 'Ciudadano'],
+      color: '#8b5cf6',
+      actividades:[
+        {key:true, text:'Periodo de actualización masiva del Padrón Electoral en los Módulos de Atención Ciudadana'},
+        {key:false, text:'Base legal: Art. 138 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Vocal RFE Distrital', role:'Coordina los MAC para la actualización del padrón y credencialización'},
+      ],
+      refs: ['Art. 138 LGIPE']
+    },
+    {
+      id: 'declaratoria',
+      date: 'Septiembre (año previo)',
+      title: 'Declaratoria de inicio del Proceso Electoral',
+      actors: ['a-cg'],
+      actorLabels:['Consejo General'],
+      color: '#8b5cf6',
+      actividades:[
+        {key:true, text:'El Consejo General emite el acuerdo formal de inicio del proceso electoral ordinario'},
+        {key:false, text:'Se publica en el DOF (Diario Oficial de la Federación)'},
+        {key:false, text:'Se integran y sesionan por primera vez los Consejos Locales y Distritales'},
+        {key:false, text:'Base legal: Art. 225 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo General', role:'Emite el acuerdo de declaratoria; define el calendario electoral completo'},
+        {actor:'Secretaría Ejecutiva', role:'Notifica a los 32 Consejos Locales y 300 Distritales su instalación'},
+        {actor:'Consejos Locales (32)', role:'Se instalan formalmente; designan a sus integrantes'},
+        {actor:'Consejos Distritales (300)', role:'Se instalan; reciben instrucciones del CG vía Junta Local'},
+      ],
+      flujo:['CG emite declaratoria → Se publica en DOF → Consejos Locales se instalan → Consejos Distritales se instalan'],
+      refs:['Art. 225 LGIPE', 'Art. 208 LGIPE']
+    },
+    {
+      id: 'topes-precampaña',
+      date: 'Octubre (año previo)',
+      title: 'Determinación de topes de precampaña y distribución de recursos',
+      actors: ['a-cg'],
+      actorLabels: ['Consejo General'],
+      color: '#8b5cf6',
+      actividades:[
+        {key:true, text:'A más tardar en octubre, el CG determina topes de gasto de precampaña por candidato (20% del tope de campaña anterior)'},
+        {key:true, text:'El CG aprueba el financiamiento público a partidos para el año de la elección'},
+        {key:false, text:'UTF propone requisitos para informes de gastos de precampaña'},
+        {key:false, text:'Base legal: Art. 229 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo General', role:'Aprueba topes; distribuye financiamiento anual entre partidos'},
+        {actor:'DEPPP', role:'Administra la ministración del financiamiento público a partidos'},
+        {actor:'Partidos Políticos', role:'Reciben notificación de sus topes y recursos asignados'},
+      ],
+      refs: ['Art. 229 LGIPE', 'Art. 43 LGPP']
+    },
+    {
+      id: 'sorteo-casillas',
+      date: 'Diciembre (año previo)',
+      title: 'Sorteo del mes para insaculación de funcionarios de casilla',
+      actors: ['a-cg'],
+      actorLabels: ['Consejo General'],
+      color: '#8b5cf6',
+      actividades:[
+        {key:true, text:'El Consejo General sortea un MES del calendario que, junto con el siguiente, serán base para la insaculación de ciudadanos para casillas'},
+        {key:true, text:'Se realiza con el corte del Listado Nominal al 15 de diciembre'},
+        {key:false, text:'El sorteo se hace en sesión pública del Consejo General'},
+        {key:false, text:'Base legal: Art. 254 LGIPE inciso a)'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo General', role:'Realiza el sorteo del mes en sesión pública; resultado es vinculante para toda la estructura'},
+        {actor:'DERFE', role:'Corta el Listado Nominal al 15 de diciembre; lo proporciona a las Juntas Distritales'},
+        {actor:'Juntas Distritales', role:'Reciben el resultado del sorteo y preparan la insaculación del 1-7 de febrero'},
+      ],
+      refs:['Art. 254 LGIPE', 'Art. 153 LGIPE']
+    },
+    {
+      id: 'precampanias',
+      date: 'Diciembre (año previo) — Enero (año elección)',
+      title: 'Precampañas electorales (partidos)',
+      actors:['a-par', 'a-cg'],
+      actorLabels: ['Partidos', 'Consejo General'],
+      color: '#8b5cf6',
+      actividades:[
+        {key:true, text:'Los partidos realizan sus procesos internos de selección de candidatos'},
+        {key:false, text:'Cada partido comunica al CG el método de selección de candidatos, mínimo 30 días antes del inicio'},
+        {key:true, text:'Las precampañas duran máx. 60 días (año presidencial, inician 3ra semana de nov) o máx. 40 días (año intermedio, inician 1ra semana de ene)'},
+        {key:false, text:'Prohibido usar recursos del Estado para precampañas'},
+      ],
+      responsabilidades:[
+        {actor:'Partidos Políticos', role:'Organizan sus procesos internos; registran precandidatos; realizan asambleas'},
+        {actor:'Consejo General', role:'Vigila el cumplimiento de topes; aplica sanciones por violaciones'},
+        {actor:'UTF', role:'Recibe informes de gasto de precampaña; audita los informes'},
+        {actor:'Precandidatos', role:'Deben entregar informe de ingresos y gastos 7 días después de la jornada interna'},
+      ],
+      refs:['Art. 226-230 LGIPE', 'Art. 227 LGIPE']
+    }
+  ]
+},
+{
+  id: 'preparacion', color: '#3b82f6', num: '01',
+  title: 'Preparación de la Elección',
+  period: 'Enero — Mayo · Año de la elección',
+  dateLabel: 'ENE–MAY · AÑO ELECCIÓN',
+  activities:[
+    {
+      id: 'designacion-cap',
+      date: 'Enero del año de la elección',
+      title: 'Designación de Capacitadores-Asistentes Electorales (CAE)',
+      actors: ['a-cd', 'a-jd'],
+      actorLabels: ['Consejo Distrital', 'Junta Distrital'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'Los Consejos Distritales designan, en el mes de enero, Supervisores y Capacitadores-Asistentes Electorales (CAE) entre ciudadanos que atendieron la convocatoria pública'},
+        {key:true, text:'Contarán con la vigilancia de los representantes de los partidos'},
+        {key:false, text:'Requisitos: ciudadano en pleno ejercicio de derechos, con credencial para votar, con estudios mínimos de secundaria'},
+        {key:false, text:'Base legal: Art. 303 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo Distrital', role:'Designa a los CAE; fija su número según la cantidad de secciones electorales del distrito'},
+        {actor:'Vocal CEEC Distrital', role:'Selecciona candidatos a CAE; diseña el proceso de capacitación'},
+        {actor:'Representantes de Partidos', role:'Vigilan el proceso de designación de los CAE'},
+        {actor:'CAE (ciudadanos)', role:'Capacitan a los funcionarios de casilla; supervisan casillas el día de la jornada'},
+      ],
+      refs: ['Art. 303 LGIPE', 'Art. 59 Reglamento de Elecciones']
+    },
+    {
+      id: 'recorrido-casillas',
+      date: '15 Enero — 15 Febrero',
+      title: 'Recorrido de secciones para localizar lugares para casillas',
+      actors: ['a-jd'],
+      actorLabels: ['Junta Distrital'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'Las Juntas Distritales Ejecutivas recorren las secciones de sus distritos para localizar lugares que cumplan los requisitos legales para casillas'},
+        {key:true, text:'Se verifican: acceso libre, garantía de secreto del voto, no ser propiedad de partido/candidato, no ser cantina/templo/fábrica'},
+        {key:false, text:'Se prefieren escuelas y oficinas públicas'},
+        {key:false, text:'No puede haber propaganda partidaria a menos de 50 metros'},
+        {key:false, text:'Base legal: Art. 255-256 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Vocal de Organización Distrital', role:'Coordina el recorrido; elabora la lista de lugares propuestos para el Consejo Distrital'},
+        {actor:'CAE', role:'Apoyan el recorrido físico de las secciones electorales del distrito'},
+        {actor:'Representantes de Partidos', role:'Pueden sugerir o impugnar lugares propuestos'},
+      ],
+      refs:['Art. 255 LGIPE', 'Art. 256 a) LGIPE']
+    },
+    {
+      id: 'insaculacion',
+      date: '1 — 7 de Febrero',
+      title: 'Insaculación del 13% de ciudadanos para casillas',
+      actors: ['a-jd'],
+      actorLabels: ['Junta Distrital'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'Las Juntas Distritales insaculan al 13% del total de ciudadanos de CADA SECCIÓN electoral (mínimo 50 ciudadanos insaculados por sección)'},
+        {key:true, text:'Se usa el Listado Nominal con corte al 15 de diciembre; basados en los dos meses sorteados por el CG en diciembre'},
+        {key:false, text:'Se da preferencia a los ciudadanos de mayor escolaridad'},
+        {key:false, text:'Base legal: Art. 254 b) LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Junta Distrital Ejecutiva', role:'Ejecuta la insaculación; genera las listas de ciudadanos por sección'},
+        {actor:'Vocal RFE Distrital', role:'Proporciona las listas nominales actualizadas para la insaculación'},
+        {actor:'Vocal CEEC Distrital', role:'Prepara el sistema de capacitación para los ciudadanos que resulten seleccionados'},
+        {actor:'Representantes de Partidos', role:'Presencian el procedimiento de insaculación'},
+      ],
+      refs:['Art. 254 b) LGIPE', 'Art. 153 LGIPE']
+    },
+    {
+      id: 'corte-lista',
+      date: '15 de Febrero (año elección)',
+      title: 'Corte de Lista Nominal y Resguardo de Credenciales',
+      actors:['a-jd', 'a-cd'],
+      actorLabels: ['Junta Distrital', 'Consejo Distrital'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'Fecha límite para que los ciudadanos recojan su credencial para votar'},
+        {key:true, text:'Las credenciales no recogidas se resguardan en bóveda bajo supervisión del Consejo Distrital'},
+        {key:false, text:'Base legal: Art. 136 y 155 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Vocal RFE Distrital', role:'Realiza el corte y coordina el resguardo de formatos de credencial'},
+      ],
+      refs:['Art. 136 LGIPE', 'Art. 155 LGIPE']
+    },
+    {
+      id: 'reg-candidatos',
+      date: 'Febrero — Marzo',
+      title: 'Registro de candidatos',
+      actors: ['a-cg', 'a-cd'],
+      actorLabels:['Consejo General', 'Consejo Distrital'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'Año Presidencial: TODOS los cargos (Presidente, Senadores, Diputados) se registran del 15 al 22 de febrero.'},
+        {key:true, text:'Año Intermedio (Solo Diputados): Se registran del 22 al 29 de marzo.'},
+        {key:false, text:'La solicitud debe incluir: nombre, domicilio, cargo, partido que postula, documentos de elegibilidad'},
+        {key:false, text:'Se verifica en 3 días; si hay omisiones, 3 días para subsanar'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo General', role:'Registra candidatos a Presidente, Senadores y Diputados RP; publica lista en DOF'},
+        {actor:'Consejos Locales (32)', role:'Registran candidatos a Senadores MR en su entidad'},
+        {actor:'Consejos Distritales (300)', role:'Registran candidatos a Diputados MR en su distrito'},
+        {actor:'Partidos Políticos', role:'Presentan las solicitudes de registro con toda la documentación requerida'},
+        {actor:'Candidatos Independientes', role:'Presentan su solicitud directamente al órgano competente según el cargo'},
+      ],
+      refs:['Art. 237 LGIPE', 'Art. 238-239 LGIPE']
+    },
+    {
+      id: 'prop-casillas',
+      date: '16 — 26 de Febrero',
+      title: 'Propuesta de ubicación de casillas al Consejo Distrital',
+      actors: ['a-jd', 'a-cd'],
+      actorLabels:['Junta Distrital', 'Consejo Distrital'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'Las Juntas Distritales presentan al Consejo Distrital la lista de lugares propuestos para casillas (incluyendo casillas especiales)'},
+        {key:true, text:'El Consejo Distrital APRUEBA o modifica el catálogo de casillas'},
+        {key:false, text:'Se pueden instalar hasta 10 casillas especiales por distrito para electores en tránsito'},
+        {key:false, text:'Base legal: Art. 256 b) LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Vocal de Organización Distrital', role:'PROPONE la lista de lugares; la presenta formalmente al Consejo Distrital'},
+        {actor:'Consejo Distrital', role:'APRUEBA el catálogo definitivo de casillas; puede modificar las propuestas'},
+        {actor:'Representantes de Partidos', role:'Pueden objetar la ubicación de casillas ante el Consejo Distrital'},
+        {actor:'Vocal de Organización Local', role:'Consolida los catálogos de todos los distritos de su entidad para el Consejo Local'},
+        {actor:'Consejo Local', role:'Aprueba el catálogo global de la entidad federativa'},
+      ],
+      flujo:[
+        'Vocal Org. Distrital propone → Consejo Distrital aprueba → Vocal Org. Local consolida → Consejo Local aprueba → Publicación oficial'
+      ],
+      refs:['Art. 256 b) LGIPE', 'Art. 258 LGIPE']
+    },
+    {
+      id: 'capacitacion-1',
+      date: 'Febrero — Abril',
+      title: 'Capacitación de ciudadanos insaculados',
+      actors: ['a-jd', 'a-cas'],
+      actorLabels: ['Junta Distrital', 'Func. Casilla'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'Los ciudadanos insaculados son convocados a cursos de capacitación; se selecciona a quienes resulten APTOS'},
+        {key:true, text:'Se da preferencia a los de mayor escolaridad para asignar cargos: Presidente, Secretario, 1er y 2do Escrutador'},
+        {key:false, text:'Quienes no aprueban o no asisten son sustituidos por el siguiente en la lista'},
+        {key:false, text:'Base legal: Art. 254 c) LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Vocal CEEC Distrital', role:'Diseña y ejecuta los cursos; evalúa a los ciudadanos; certifica su aptitud'},
+        {actor:'CAE (Capacitadores-Asistentes)', role:'Dan los cursos de capacitación en campo; hacen visitas domiciliarias a los ciudadanos seleccionados'},
+        {actor:'Ciudadanos insaculados', role:'Asisten obligatoriamente a los cursos; aprenden las funciones de su cargo'},
+        {actor:'Vocal CEEC Local', role:'Supervisa que todos los distritos completen la capacitación; reporta porcentajes al CG'},
+      ],
+      refs:['Art. 254 c)-d) LGIPE', 'Art. 215 LGIPE']
+    },
+    {
+      id: 'sorteo-alfabeto',
+      date: 'Febrero (año de la elección)',
+      title: 'Segundo sorteo: 26 letras del alfabeto para integración de mesas',
+      actors:['a-cg'],
+      actorLabels: ['Consejo General'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'El Consejo General sortea las 26 letras del alfabeto para determinar el ORDEN en que se seleccionará a los ciudadanos aptos como funcionarios (por apellido paterno)'},
+        {key:false, text:'Con base en este sorteo, las Juntas Distritales forman la relación de ciudadanos por sección'},
+        {key:false, text:'Base legal: Art. 254 d) LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo General', role:'Realiza el sorteo de las 26 letras en sesión pública'},
+        {actor:'Juntas Distritales', role:'Aplican el resultado para ordenar a los ciudadanos aptos en sus relaciones por sección'},
+      ],
+      refs: ['Art. 254 d) LGIPE']
+    },
+    {
+      id: 'integracion-mesas',
+      date: 'Abril — Mayo',
+      title: 'Integración de mesas directivas de casilla e insaculación final',
+      actors: ['a-cd', 'a-jd'],
+      actorLabels:['Consejo Distrital', 'Junta Distrital'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'Los Consejos Distritales insaculan de la relación de ciudadanos aptos a quienes integrarán cada mesa directiva de casilla'},
+        {key:true, text:'Las Juntas Distritales asignan los cargos según escolaridad: mayor escolaridad → Presidente; segunda → Secretario; las siguientes → Escrutadores'},
+        {key:false, text:'Se deben designar propietarios Y suplentes para cada cargo'},
+        {key:false, text:'Base legal: Art. 254 e)-f) LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo Distrital', role:'INSACULA a los funcionarios de casilla de la relación de aptos; formaliza los nombramientos'},
+        {actor:'Junta Distrital', role:'Integra la mesa con los ciudadanos seleccionados; asigna cargos según escolaridad'},
+        {actor:'Vocal de Organización Distrital', role:'Coordina la logística de integración; prepara nombramientos'},
+        {actor:'Consejo Distrital', role:'NOTIFICA personalmente a cada ciudadano su nombramiento como funcionario de casilla'},
+      ],
+      refs: ['Art. 254 e)-f) LGIPE']
+    },
+    {
+      id: 'campañas',
+      date: 'Marzo — Mayo',
+      title: 'Campañas electorales',
+      actors: ['a-par', 'a-cg'],
+      actorLabels: ['Partidos', 'Consejo General'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'Campañas: 90 días para Presidente/Senadores; 60 días solo Diputados; 45 días para renovación parcial Senado'},
+        {key:true, text:'El INE administra los TIEMPOS EN RADIO Y TV de partidos (no pueden comprar tiempo en medios)'},
+        {key:false, text:'Prohibida propaganda gubernamental durante campañas (excepto salud, educación, protección civil)'},
+        {key:false, text:'La propaganda impresa debe ser reciclable y biodegradable'},
+        {key:false, text:'Retiro de propaganda 3 días antes de la jornada'},
+        {key:false, text:'Base legal: Art. 209-210 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo General', role:'Administra tiempos en medios; supervisa el cumplimiento de topes de gasto de campaña'},
+        {actor:'DEPPP', role:'Distribuye los tiempos en radio y TV entre partidos; emite los catálogos de transmisión'},
+        {actor:'Partidos y Candidatos', role:'Realizan actos de campaña; controlan su gasto conforme a los topes aprobados'},
+        {actor:'Vocal PP Local', role:'Vigila la propaganda electoral en la entidad; reporta violaciones'},
+        {actor:'UTF', role:'Monitorea el gasto de campaña en tiempo real; alertas por posible exceso'},
+      ],
+      refs:['Art. 209-250 LGIPE', 'Art. 231-236 LGIPE']
+    },
+    {
+      id: 'boletas',
+      date: '15 días antes de la elección',
+      title: 'Recepción de boletas electorales en consejos distritales',
+      actors:['a-cd', 'a-cg'],
+      actorLabels: ['Consejo Distrital', 'Consejo General'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'Las boletas deben obrar en poder del Consejo Distrital 15 días antes de la elección'},
+        {key:true, text:'El Consejo General aprueba el modelo de boleta (con candidatos, emblemas, colores); no se modifica aunque haya cancelaciones después de la impresión'},
+        {key:false, text:'Personal autorizado del INE entrega las boletas al Presidente del Consejo Distrital con representantes de partidos presentes'},
+        {key:false, text:'Base legal: Art. 266-268 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo General', role:'Aprueba el diseño de la boleta; supervisa la impresión y distribución'},
+        {actor:'Junta Distrital', role:'Designa la bodega electoral para resguardo; recibe las boletas con inventario'},
+        {actor:'Consejo Distrital', role:'El Presidente recibe las boletas con representantes de partidos presentes'},
+        {actor:'Representantes de Partidos', role:'Presencian la recepción y conteo de boletas; pueden levantar protesta'},
+      ],
+      refs:['Art. 266 LGIPE', 'Art. 268 LGIPE']
+    },
+    {
+      id: 'entrega-material',
+      date: '5 días previos al anterior de la elección',
+      title: 'Entrega de material a presidentes de casilla',
+      actors:['a-cd', 'a-cas'],
+      actorLabels: ['Consejo Distrital', 'Func. Casilla'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'El Presidente del Consejo Distrital entrega a cada Presidente de casilla: Lista Nominal con fotografía, relación de representantes de partidos, boletas, urnas, cancel, tinta indeleble, actas'},
+        {key:false, text:'Contra recibo detallado'},
+        {key:false, text:'Base legal: Art. 269 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Presidente del Consejo Distrital (Vocal Ejecutivo)', role:'Entrega personalmente el material electoral a cada Presidente de casilla'},
+        {actor:'Presidente de Mesa Directiva', role:'Recibe y firma el recibo detallado de todo el material; es responsable de su resguardo'},
+        {actor:'Vocal RFE Distrital', role:'Proporciona la Lista Nominal definitiva al Consejo para su distribución a casillas'},
+        {actor:'Vocal de Organización Distrital', role:'Coordina la logística de distribución de materiales'},
+      ],
+      refs:['Art. 269 LGIPE', 'Art. 270 LGIPE']
+    },
+    {
+      id: 'registro-representantes',
+      date: 'Desde publicación de lista de casillas hasta 13 días antes de la elección',
+      title: 'Registro de representantes de partidos ante casillas',
+      actors:['a-par', 'a-cd'],
+      actorLabels: ['Partidos', 'Consejo Distrital'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'Los partidos registran a sus representantes de casilla (propietarios y suplentes) y representantes generales ante el Consejo Distrital'},
+        {key:false, text:'El nombramiento debe incluir: nombre, partido, tipo (propietario/suplente), número de casilla, clave de credencial'},
+        {key:false, text:'Base legal: Art. 262-265 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Partidos Políticos', role:'Acreditan a sus representantes; entregan la documentación al Consejo Distrital'},
+        {actor:'Consejo Distrital', role:'Recibe y valida los nombramientos; devuelve el original sellado al partido'},
+        {actor:'Secretario del Consejo Distrital', role:'Entrega copia de la relación de representantes generales a los presidentes de casilla'},
+      ],
+      refs:['Art. 262 LGIPE', 'Art. 264-265 LGIPE']
+    },
+    {
+      id: 'voto-anticipado',
+      date: 'Semanas antes de la jornada',
+      title: 'Modalidades de Voto Anticipado',
+      actors: ['a-ciu', 'a-jd'],
+      actorLabels:['Ciudadano', 'Junta Distrital'],
+      color: '#3b82f6',
+      actividades:[
+        {key:true, text:'Voto en urna anticipada: ciudadanos con discapacidad o adultos mayores; se instalan módulos especiales en fechas previas'},
+        {key:true, text:'Voto por internet: mexicanos residentes en el extranjero; periodo de votación anticipada en línea'},
+        {key:true, text:'Voto postal: electores en el extranjero que solicitan su boleta por correo'},
+        {key:true, text:'Voto en prisión preventiva: personas en centros de detención sin condena; casillas especiales instaladas en los centros (Acuerdo CG/2023)'},
+        {key:false, text:'Base legal: Art. 329 y ss LGIPE; Acuerdos INE/CG602/2023'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo General', role:'Aprueba los lineamientos y modelos de operación para cada modalidad de voto anticipado'},
+        {actor:'DERFE', role:'Gestiona el Listado Nominal de electores en extranjero; verifica credenciales'},
+        {actor:'Junta Distrital', role:'Instala módulos de urnas anticipadas; coordina con centros penitenciarios'},
+        {actor:'Ciudadano/Elector', role:'Solicita y ejerce su voto en la modalidad correspondiente según su situación'},
+      ],
+      refs:['Art. 329 LGIPE', 'Acuerdo INE/CG602/2023', 'Modelo Voto Anticipado 2023-2024']
+    }
+  ]
+},
+{
+  id: 'jornada', color: '#10b981', num: '02',
+  title: 'Jornada Electoral',
+  period: 'Primer domingo de junio · 7:30 – cierre',
+  dateLabel: '1er DOMINGO DE JUNIO',
+  activities:[
+    {
+      id: 'preparacion-casilla',
+      date: '7:30 hrs — Primer domingo de junio',
+      title: 'Presentación e instalación de la casilla',
+      actors: ['a-cas', 'a-par'],
+      actorLabels: ['Func. Casilla', 'Partidos'],
+      color: '#10b981',
+      actividades:[
+        {key:true, text:'A las 7:30 hrs los ciudadanos Presidente, Secretario y Escrutadores PROPIETARIOS se presentan para los preparativos'},
+        {key:true, text:'Se revisa el material; se instala el cancel de votación; se verifica que la lista nominal esté en orden'},
+        {key:false, text:'Si a las 8:15 hrs no se ha podido instalar: el Presidente designa funcionarios suplentes; si falta el Presidente, el Secretario asume su función; si faltan ambos, el Escrutador presente; si no hay nadie, los electores presentes eligen'},
+        {key:false, text:'Base legal: Art. 273-274 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Presidente de Mesa', role:'Dirige la instalación; verifica que el local cumpla las condiciones; coordina al resto de funcionarios'},
+        {actor:'Secretario de Mesa', role:'Revisa y organiza la documentación; verifica la lista nominal; llena el acta de instalación'},
+        {actor:'1er Escrutador', role:'Apoya al Secretario; cuenta las boletas que se reciben'},
+        {actor:'2do Escrutador', role:'Apoya al Presidente; ayuda a organizar el espacio físico de la casilla'},
+        {actor:'Representantes de Partidos', role:'Están presentes durante la instalación; pueden firmar el acta de instalación'},
+        {actor:'CAE', role:'Visita la casilla entre 7:30-8:00 hrs para verificar que los funcionarios asistieron'},
+      ],
+      refs:['Art. 273 LGIPE', 'Art. 274 LGIPE']
+    },
+    {
+      id: 'apertura',
+      date: '8:00 hrs',
+      title: 'Apertura oficial y inicio de la votación',
+      actors: ['a-cas'],
+      actorLabels: ['Func. Casilla'],
+      color: '#10b981',
+      actividades:[
+        {key:true, text:'El Presidente firma el acta de la jornada electoral en el apartado de INSTALACIÓN junto con todos los funcionarios y representantes'},
+        {key:true, text:'Una vez llenada y firmada el acta de instalación, el Presidente ANUNCIA el inicio de la votación'},
+        {key:false, text:'Iniciada la votación, NO puede suspenderse salvo fuerza mayor; si hay suspensión, el Presidente avisa al Consejo Distrital'},
+        {key:false, text:'Base legal: Art. 273, 277 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Presidente de Mesa', role:'Anuncia formalmente el inicio de la votación; mantiene el orden en la casilla'},
+        {actor:'Secretario de Mesa', role:'Llena el acta de instalación; certifica la apertura junto con el Presidente'},
+        {actor:'Representantes de Partidos', role:'Firman el acta de instalación; tienen derecho a observar y registrar incidentes'},
+      ],
+      refs:['Art. 277 LGIPE', 'Art. 273 párr. 2 LGIPE']
+    },
+    {
+      id: 'recepcion-votos',
+      date: '8:00 — 18:00 hrs',
+      title: 'Recepción de votos',
+      actors: ['a-cas', 'a-ciu'],
+      actorLabels:['Func. Casilla', 'Ciudadano'],
+      color: '#10b981',
+      actividades:[
+        {key:true, text:'El elector se presenta con su credencial para votar vigente; el Presidente verifica que aparece en la lista nominal'},
+        {key:true, text:'Verificado el elector, el Presidente le entrega las boletas; el elector marca en el cancel (en secreto) y deposita en la urna'},
+        {key:true, text:'El Secretario (auxiliado por un Escrutador) anota "VOTÓ" en la lista nominal y MARCA LA CREDENCIAL del elector con tinta indeleble'},
+        {key:false, text:'Los electores con credencial con errores de seccionamiento pueden votar si aparecen en la lista nominal de su sección'},
+        {key:false, text:'Electores que no saben leer o tienen impedimento físico pueden ser asistidos por una persona de su confianza'},
+        {key:false, text:'Base legal: Art. 278-279 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Presidente de Mesa', role:'Verifica credenciales; entrega boletas; mantiene el orden; puede pedir auxilio de fuerzas del orden'},
+        {actor:'Secretario de Mesa', role:'Anota "votó" en la lista nominal; aplica tinta indeleble en credencial; registra incidentes'},
+        {actor:'1er Escrutador', role:'Auxilia al Secretario en el sellado de credenciales y el control de la lista nominal'},
+        {actor:'2do Escrutador', role:'Auxilia al Presidente en el control del acceso y orden en la casilla'},
+        {actor:'Representantes de Partidos', role:'Observan la votación; pueden presentar escritos de incidentes al Secretario'},
+        {actor:'Ciudadano/Elector', role:'Vota en el orden en que se presenta; necesita credencial para votar vigente'},
+      ],
+      refs:['Art. 278-282 LGIPE', 'Art. 279 LGIPE']
+    },
+    {
+      id: 'cierre-votacion',
+      date: '18:00 hrs (o cuando todos en fila hayan votado)',
+      title: 'Cierre de la votación',
+      actors: ['a-cas'],
+      actorLabels:['Func. Casilla'],
+      color: '#10b981',
+      actividades:[
+        {key:true, text:'La votación CIERRA a las 18:00 hrs; puede cerrar ANTES si votaron todos los inscritos en la lista nominal'},
+        {key:true, text:'Permanece abierta DESPUÉS de las 18:00 hrs si hay electores formados en la fila a esa hora; cierra cuando vote el último de ellos'},
+        {key:true, text:'El Presidente DECLARA cerrada la votación; el Secretario llena el apartado de "cierre de votación" del acta'},
+        {key:false, text:'El acta de cierre incluye: hora de cierre y causa (antes/después de las 18:00)'},
+        {key:false, text:'Base legal: Art. 285-286 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Presidente de Mesa', role:'DECLARA cerrada la votación; supervisa que no quede nadie sin votar en la fila'},
+        {actor:'Secretario de Mesa', role:'Llena el apartado de cierre en el acta de la jornada; lo firma junto con los demás funcionarios'},
+        {actor:'Representantes de Partidos', role:'Pueden ser testigos del cierre; firma del acta bajo protesta si hay inconformidades'},
+      ],
+      refs: ['Art. 285 LGIPE', 'Art. 286 LGIPE']
+    }
+  ]
+},
+{
+  id: 'escrutinio', color: '#f59e0b', num: '03',
+  title: 'Escrutinio y Cómputo en Casilla',
+  period: 'Inmediatamente después del cierre de votación',
+  dateLabel: 'TARDE DEL DOMINGO',
+  activities:[
+    {
+      id: 'proceso-escrutinio',
+      date: 'Inmediatamente al cierre (18:00 hrs aprox.)',
+      title: 'Procedimiento de escrutinio y cómputo',
+      actors: ['a-cas'],
+      actorLabels: ['Func. Casilla'],
+      color: '#f59e0b',
+      actividades:[
+        {key:true, text:'Orden del escrutinio: 1° Presidente; 2° Senadores; 3° Diputados; 4° Consulta popular (si aplica)'},
+        {key:true, text:'El Secretario cuenta las BOLETAS SOBRANTES y las inutiliza con dos rayas diagonales de tinta; las guarda en sobre especial'},
+        {key:true, text:'El 1er Escrutador cuenta DOS VECES el número de ciudadanos que votaron según la lista nominal'},
+        {key:true, text:'El Presidente abre las urnas; los Escrutadores cuentan y clasifican los votos: válidos por partido, nulos, candidatos no registrados'},
+        {key:false, text:'Voto nulo: sin marcar ningún cuadro con emblema, o marcado dos o más cuadros sin coalición'},
+        {key:false, text:'Base legal: Art. 287-292 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Presidente de Mesa', role:'Abre las urnas; supervisa el proceso; resuelve dudas sobre validez de votos; mantiene el orden'},
+        {actor:'Secretario de Mesa', role:'Inutiliza boletas sobrantes; lleva el registro escrito de los resultados'},
+        {actor:'1er Escrutador', role:'Cuenta ciudadanos en la lista nominal (dos veces); clasifica los votos válidos por partido'},
+        {actor:'2do Escrutador', role:'Cuenta y clasifica los votos nulos; cuenta los votos de candidatos no registrados'},
+        {actor:'Representantes de Partidos', role:'Observan todo el proceso; pueden objetar la clasificación de un voto'},
+      ],
+      refs:['Art. 288-292 LGIPE', 'Art. 289 LGIPE', 'Art. 290 LGIPE']
+    },
+    {
+      id: 'actas-casilla',
+      date: 'Al término del escrutinio (domingo tarde-noche)',
+      title: 'Levantamiento de actas y clausura de casilla',
+      actors:['a-cas', 'a-prep'],
+      actorLabels: ['Func. Casilla', 'PREP-INE'],
+      color: '#f59e0b',
+      actividades:[
+        {key:true, text:'Se levanta un acta de escrutinio y cómputo POR CADA ELECCIÓN; cada una contiene: votos por partido, boletas sobrantes inutilizadas, votos nulos, incidentes'},
+        {key:true, text:'TODOS los funcionarios y representantes firman las actas SIN EXCEPCIÓN; si se niegan a firmar, el Secretario lo hace constar'},
+        {key:true, text:'La PRIMERA COPIA de cada acta se destina al PREP (Programa de Resultados Electorales Preliminares)'},
+        {key:true, text:'Se fija en el EXTERIOR de la casilla un aviso con los resultados, firmado por el Presidente'},
+        {key:false, text:'Se forma el expediente de casilla con: acta de la jornada, actas de escrutinio, escritos de protesta'},
+        {key:false, text:'Base legal: Art. 293-298 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Presidente de Mesa', role:'Fija el aviso de resultados en el exterior de la casilla; clausura formalmente la casilla'},
+        {actor:'Secretario de Mesa', role:'Levanta las actas; las hace firmar; levanta constancia de clausura con hora'},
+        {actor:'Representantes de Partidos', role:'Reciben copia legible de las actas; pueden firmar "bajo protesta" indicando motivos'},
+        {actor:'CAE/Asistente Electoral', role:'Recoge la primera copia del acta para captura en el PREP'},
+        {actor:'Sistema PREP (INE)', role:'Captura los datos del acta para publicar resultados preliminares en tiempo real'},
+      ],
+      refs:['Art. 293-298 LGIPE', 'Art. 296 LGIPE', 'Art. 305 LGIPE']
+    },
+    {
+      id: 'traslado-paquetes',
+      date: 'Horas después del cierre',
+      title: 'Traslado del paquete electoral al Consejo Distrital',
+      actors: ['a-cas', 'a-cd'],
+      actorLabels:['Func. Casilla', 'Consejo Distrital'],
+      color: '#f59e0b',
+      actividades:[
+        {key:true, text:'El Presidente de la casilla, bajo su responsabilidad, hace llegar el paquete al Consejo Distrital en los siguientes plazos contados desde la clausura:'},
+        {key:true, text:'INMEDIATAMENTE para casillas en la cabecera del distrito'},
+        {key:true, text:'Hasta 12 HORAS para casillas urbanas fuera de la cabecera'},
+        {key:true, text:'Hasta 24 HORAS para casillas rurales'},
+        {key:false, text:'El Consejo Distrital adopta medidas previas para garantizar la recepción dentro de los plazos'},
+        {key:false, text:'Base legal: Art. 299 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Presidente de Mesa', role:'Es RESPONSABLE DIRECTO de que el paquete llegue al Consejo Distrital dentro del plazo'},
+        {actor:'Consejo Distrital', role:'El Presidente extiende el recibo con hora exacta de recepción; dispone el depósito ordenado en bodega'},
+        {actor:'Fuerzas de Seguridad', role:'Pueden brindar custodia a los paquetes durante el traslado si el Consejo lo solicita'},
+      ],
+      refs: ['Art. 299 LGIPE', 'Art. 304 LGIPE']
+    }
+  ]
+},
+{
+  id: 'prep', color: '#ec4899', num: '04',
+  title: 'PREP — Resultados Preliminares',
+  period: 'Domingo noche · No vinculante',
+  dateLabel: 'DOMINGO NOCHE (NO OFICIAL)',
+  activities:[
+    {
+      id: 'prep-captura',
+      date: 'Domingo — conforme llegan los paquetes',
+      title: 'Programa de Resultados Electorales Preliminares (PREP)',
+      actors: ['a-cd', 'a-prep'],
+      actorLabels:['Consejo Distrital', 'PREP-INE'],
+      color: '#ec4899',
+      actividades:[
+        {key:true, text:'El PREP es el mecanismo de información PREVIO, NO DEFINITIVO y de carácter ESTRICTAMENTE INFORMATIVO'},
+        {key:true, text:'Conforme los paquetes llegan al Consejo Distrital, se capturan los datos del acta adherida al exterior del paquete'},
+        {key:true, text:'El INE define los lineamientos del PREP en el mes de ABRIL del año de la elección'},
+        {key:false, text:'Los resultados del PREP NO sustituyen al cómputo distrital oficial que es el vinculante'},
+        {key:false, text:'Base legal: Art. 305-308 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo General', role:'Define lineamientos del PREP en abril del año de la elección; supervisa su operación'},
+        {actor:'Consejo Distrital', role:'Autoriza personal para recepción continua de paquetes; captura los datos del acta exterior'},
+        {actor:'Comité Técnico Asesor PREP', role:'Asesora al INE en los lineamientos técnicos del sistema'},
+        {actor:'Ciudadano/Sociedad', role:'Consulta los resultados no definitivos en tiempo real a través de la plataforma del INE'},
+      ],
+      refs: ['Art. 305 LGIPE', 'Art. 306-308 LGIPE']
+    }
+  ]
+},
+{
+  id: 'computo', color: '#ef4444', num: '05',
+  title: 'Cómputos Oficiales',
+  period: 'Miércoles siguiente a la jornada (distrital) · Domingo (estatal)',
+  dateLabel: 'MIÉRC-DOM SIGUIENTES',
+  activities:[
+    {
+      id: 'computo-distrital',
+      date: 'Miércoles siguiente a la jornada — 8:00 hrs',
+      title: 'Cómputo Distrital (Diputados, Presidente, Senadores)',
+      actors: ['a-cd'],
+      actorLabels: ['Consejo Distrital'],
+      color: '#ef4444',
+      actividades:[
+        {key:true, text:'El Consejo Distrital sesiona a partir de las 8:00 hrs del MIÉRCOLES siguiente a la jornada'},
+        {key:true, text:'Orden del cómputo: 1° Presidente; 2° Diputados; 3° Senadores'},
+        {key:true, text:'El cómputo es la SUMA de los resultados de las actas de escrutinio y cómputo de todas las casillas del distrito'},
+        {key:true, text:'Se abren paquetes sin alteraciones y se comparan las actas del paquete con las que tiene el Presidente del Consejo'},
+        {key:true, text:'Si hay paquetes con muestras de ALTERACIÓN o discrepancias entre actas, SE ABRE y se hace RECUENTO de votos'},
+        {key:false, text:'Base legal: Art. 309-316 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo Distrital (Vocal Ejecutivo preside)', role:'Dirige el cómputo; resuelve incidentes; ordena recuentos cuando procedan'},
+        {actor:'Secretario del Consejo Distrital', role:'Levanta el acta circunstanciada de la sesión de cómputo'},
+        {actor:'Representantes de Partidos', role:'Pueden solicitar apertura de paquetes y recuento cuando detecten inconsistencias; presentan escritos de protesta'},
+        {actor:'Personal SPEN', role:'Puede auxiliar al Consejo en el recuento de votos (designado por el CG)'},
+      ],
+      refs:['Art. 309-311 LGIPE', 'Art. 310 LGIPE']
+    },
+    {
+      id: 'constancia-mayoria',
+      date: 'Al concluir el cómputo distrital',
+      title: 'Declaración de validez y constancia de mayoría (Diputados)',
+      actors:['a-cd'],
+      actorLabels: ['Consejo Distrital'],
+      color: '#ef4444',
+      actividades:[
+        {key:true, text:'Concluido el cómputo de Diputados, el Presidente del Consejo Distrital emite la DECLARACIÓN DE VALIDEZ'},
+        {key:true, text:'Se expide la CONSTANCIA DE MAYORÍA Y VALIDEZ a quien haya obtenido el triunfo (salvo inelegibilidad)'},
+        {key:false, text:'Los resultados se fijan en el EXTERIOR del local del Consejo Distrital'},
+        {key:false, text:'Base legal: Art. 312 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Presidente del Consejo Distrital', role:'Expide la constancia de mayoría al candidato ganador'},
+        {actor:'Partidos Políticos', role:'Pueden impugnar el cómputo ante el TEPJF mediante JIN (Juicio de Inconformidad) dentro de los 4 días siguientes'},
+        {actor:'TEPJF', role:'Si hay JIN, puede ordenar al Consejo Distrital un nuevo cómputo o recuento total'},
+      ],
+      refs:['Art. 312 LGIPE', 'Art. 315-317 LGIPE']
+    },
+    {
+      id: 'computo-local',
+      date: 'Domingo siguiente a la jornada electoral',
+      title: 'Cómputo de entidad federativa (Senadores)',
+      actors: ['a-cl'],
+      actorLabels: ['Consejo Local'],
+      color: '#ef4444',
+      actividades:[
+        {key:true, text:'Los Consejos Locales sesionan el DOMINGO siguiente a la jornada para el cómputo de Senadores por ambos principios (MR y RP)'},
+        {key:true, text:'Es la SUMA de todos los cómputos distritales de la entidad para la elección de Senadores'},
+        {key:true, text:'Si la diferencia entre el primero y el segundo lugar es igual o menor a 1%, el Presidente del Consejo Local avisa al Secretario Ejecutivo del INE'},
+        {key:false, text:'Base legal: Art. 319-320 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Consejo Local (Vocal Ejecutivo Local preside)', role:'Dirige la sesión de cómputo; suma los resultados distritales; emite la declaración de validez de Senadores MR'},
+        {actor:'Representantes de Partidos', role:'Participan con voz en la sesión; pueden presentar escritos de protesta'},
+        {actor:'Secretario Ejecutivo del INE', role:'Es notificado si hay diferencia ≤1% para informar al CG'},
+      ],
+      refs: ['Art. 319-320 LGIPE']
+    },
+    {
+      id: 'remision-tepjf',
+      date: 'Concluido el cómputo distrital',
+      title: 'Remisión de expedientes al TEPJF (si hay impugnación)',
+      actors: ['a-cd', 'a-tep'],
+      actorLabels:['Consejo Distrital', 'TEPJF'],
+      color: '#ef4444',
+      actividades:[
+        {key:true, text:'Si se interpuso un medio de impugnación, el Presidente del Consejo Distrital remite a la Sala competente del TEPJF: el medio de impugnación, escritos de protesta, informe, copia certificada del expediente de cómputo'},
+        {key:true, text:'Para la elección presidencial: el expediente del cómputo distrital se remite al TEPJF siempre (una vez vencido el plazo de impugnación o con la impugnación interpuesta)'},
+        {key:false, text:'El Consejo Distrital CONSERVA copia certificada de todo el expediente'},
+        {key:false, text:'Base legal: Art. 317 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Presidente del Consejo Distrital', role:'Integra y remite el expediente al TEPJF; conserva copias certificadas'},
+        {actor:'TEPJF (Sala Superior)', role:'Recibe los expedientes de cómputo distrital de la elección presidencial de los 300 distritos'},
+        {actor:'TEPJF (Sala Regional)', role:'Recibe expedientes de cómputos de Diputados y Senadores cuando hay JIN'},
+        {actor:'Partidos/Candidatos', role:'Tienen 4 días desde el cómputo para interponer el JIN ante la Sala correspondiente'},
+      ],
+      refs: ['Art. 317 LGIPE', 'Art. 331 LGIPE']
+    }
+  ]
+},
+{
+  id: 'validez', color: '#06b6d4', num: '06',
+  title: 'Resultados y Declaraciones de Validez',
+  period: 'Miércoles — hasta resolución TEPJF',
+  dateLabel: 'SEMANAS POSTERIORES',
+  activities:[
+    {
+      id: 'tepjf-resolucion',
+      date: 'Agosto — Septiembre',
+      title: 'Resolución de impugnaciones por el TEPJF',
+      actors: ['a-tep'],
+      actorLabels: ['TEPJF'],
+      color: '#06b6d4',
+      actividades:[
+        {key:true, text:'Límite Diputados/Senadores: TEPJF debe resolver a más tardar el 31 de agosto.'},
+        {key:true, text:'Límite Presidencial: TEPJF debe resolver y declarar validez a más tardar el 6 de septiembre.'},
+        {key:false, text:'El TEPJF puede: CONFIRMAR la validez, ANULAR la votación de casillas específicas, ordenar RECÓMPUTO total o parcial, o en casos extremos ANULAR la elección'},
+        {key:false, text:'La sentencia del TEPJF en materia presidencial es DEFINITIVA e INATACABLE'},
+      ],
+      responsabilidades:[
+        {actor:'TEPJF Sala Superior', role:'Resuelve las impugnaciones; emite sentencias vinculantes; puede revocar actos del INE'},
+        {actor:'TEPJF Salas Regionales', role:'Resuelven JIN de Diputados y Senadores en sus circunscripciones'},
+        {actor:'INE (Consejos afectados)', role:'Ejecuta las sentencias del TEPJF (nuevo cómputo, recuento, o acto ordenado)'},
+        {actor:'Partidos/Candidatos', role:'Partes en el juicio; pueden impugnar hasta la Sala Superior'},
+      ],
+      refs:['Art. 99 CPEUM', 'Arts. 50-88 LGSMIME']
+    },
+    {
+      id: 'declaratoria-validez',
+      date: 'Al resolver la última impugnación',
+      title: 'Declaración de validez de la elección y Presidente Electo',
+      actors:['a-tep', 'a-cg'],
+      actorLabels: ['TEPJF', 'Consejo General'],
+      color: '#06b6d4',
+      actividades:[
+        {key:true, text:'La Sala Superior del TEPJF emite la DECLARACIÓN DE VALIDEZ DE LA ELECCIÓN presidencial y califica al Presidente Electo'},
+        {key:true, text:'El Consejo General del INE declara la validez de la elección de Diputados y Senadores y otorga las constancias de asignación de representación proporcional'},
+        {key:false, text:'La declaración del TEPJF es definitiva; ningún otro órgano puede revocarla'},
+        {key:false, text:'Base legal: Art. 41 CPEUM, Art. 99 CPEUM'},
+      ],
+      responsabilidades:[
+        {actor:'TEPJF Sala Superior', role:'Emite la declaración de validez de la elección presidencial; otorga constancia de Presidente Electo'},
+        {actor:'Consejo General INE', role:'Asigna curules de RP a diputados y senadores; declara la validez de esas elecciones'},
+        {actor:'Partidos Políticos', role:'Reciben las constancias de asignación de representación proporcional para sus candidatos de lista'},
+      ],
+      refs:['Art. 41 CPEUM', 'Art. 99 CPEUM', 'Art. 208 d) LGIPE']
+    },
+    {
+      id: 'conclusiones',
+      date: 'Concluido el proceso',
+      title: 'Conclusión del proceso electoral y destrucción de materiales',
+      actors: ['a-cd', 'a-jd'],
+      actorLabels:['Consejo Distrital', 'Junta Distrital'],
+      color: '#06b6d4',
+      actividades:[
+        {key:true, text:'Una vez concluido el proceso, los sobres con la documentación de escrutinio (boletas, etc.) se DESTRUYEN bajo supervisión del Consejo Distrital'},
+        {key:false, text:'Los Consejos Locales y Distritales concluyen sus funciones hasta que el proceso formal termine'},
+        {key:false, text:'Los Vocales de las Juntas continúan sus funciones permanentes en materia de padrón electoral, capacitación y organización'},
+        {key:false, text:'Base legal: Art. 318 LGIPE'},
+      ],
+      responsabilidades:[
+        {actor:'Presidentes Consejos Distritales', role:'Supervisan la destrucción de materiales electorales; mantienen copias certificadas'},
+        {actor:'Vocales de la Junta Distrital', role:'Continúan sus funciones permanentes (credencialización, padrón, etc.)'},
+      ],
+      refs: ['Art. 318 LGIPE']
+    }
+  ]
+}
+];
+
+// ══════════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════════
+
+// Actor tag builder
+function actTag(cls, label) {
+  return `<span class="actor-tag ${cls}">${label}</span>`;
+}
+
+// Build nav
+const nav = document.getElementById('stageNav');
+stages.forEach(s => {
+  const btn = document.createElement('button');
+  btn.className = 'snav-btn';
+  btn.textContent = s.title;
+  btn.style.borderColor = s.color + '80';
+  btn.style.color = s.color;
+  btn.style.background = s.color + '18';
+  btn.onclick = () => {
+    document.getElementById('stage-' + s.id).scrollIntoView({behavior:'smooth'});
+  };
+  nav.appendChild(btn);
+});
+
+// Build sidebar
+const sidebar = document.getElementById('sidebar');
+stages.forEach(s => {
+  const el = document.createElement('div');
+  el.className = 'sidebar-stage';
+  el.id = 'sb-' + s.id;
+  el.style.borderLeftColor = s.color;
+  el.innerHTML = `
+    <div class="ss-label" style="color:${s.color}">${s.num} · ${s.title}</div>
+    <div class="ss-date">${s.dateLabel}</div>
+  `;
+  el.onclick = () => document.getElementById('stage-' + s.id).scrollIntoView({behavior:'smooth'});
+  sidebar.appendChild(el);
+});
+
+// Build timeline
+const content = document.getElementById('content');
+
+// Timeline bar
+const tl = document.createElement('div');
+tl.className = 'timeline-overview';
+const segs =[
+  {label:'SEP·AÑO PREVIO', color:'#8b5cf6', flex:1, id:'inicio'},
+  {label:'ENE–MAY', color:'#3b82f6', flex:2.5, id:'preparacion'},
+  {label:'JUN DÍA', color:'#10b981', flex:0.5, id:'jornada'},
+  {label:'ESCRUTINIO', color:'#f59e0b', flex:0.5, id:'escrutinio'},
+  {label:'PREP', color:'#ec4899', flex:0.3, id:'prep'},
+  {label:'CÓMPUTOS', color:'#ef4444', flex:0.7, id:'computo'},
+  {label:'VALIDEZ', color:'#06b6d4', flex:1, id:'validez'},
+];
+tl.innerHTML = `
+  <div class="tl-title">↔ Línea de Tiempo — Proceso Electoral Federal Completo (aprox. 10 meses)</div>
+  <div class="tl-bar">
+    ${segs.map(s => `<div class="tl-seg" style="flex:${s.flex};background:${s.color}22;border:1px solid ${s.color}55;color:${s.color}" onclick="document.getElementById('stage-${s.id}').scrollIntoView({behavior:'smooth'})">${s.label}</div>`).join('')}
+  </div>
+  <div class="tl-months">
+    <span>SEP</span><span>NOV</span><span>ENE</span><span>MAR</span><span>MAY</span><span>JUN</span><span>JUL</span><span>AGO</span>
+  </div>
+`;
+content.appendChild(tl);
+
+// Build stages
+stages.forEach(stage => {
+  const sec = document.createElement('div');
+  sec.className = 'stage-section';
+  sec.id = 'stage-' + stage.id;
+
+  let actsHtml = '';
+  stage.activities.forEach((act, idx) => {
+    const actorTagsHtml = act.actors.map((a, i) => actTag(a, act.actorLabels[i])).join('');
+
+    let detailHtml = '';
+
+    // Actividades
+    if (act.actividades && act.actividades.length) {
+      detailHtml += `<div class="detail-grid">`;
+      detailHtml += `<div class="detail-block"><div class="db-title">📋 Actividades</div><ul class="db-list">`;
+      act.actividades.forEach(a => {
+        if (a.law) {
+          detailHtml += `<li class="law">${a.text}</li>`;
+        } else {
+          detailHtml += `<li class="${a.key ? 'key' : ''}">${a.text}</li>`;
+        }
+      });
+      detailHtml += '</ul></div>';
+
+      // Responsabilidades
+      if (act.responsabilidades) {
+        detailHtml += `<div class="detail-block"><div class="db-title">👤 Responsables & Rol</div><ul class="db-list">`;
+        act.responsabilidades.forEach(r => {
+          detailHtml += `<li><strong style="color:#fff;font-size:0.68rem">${r.actor}</strong>: ${r.role}</li>`;
+        });
+        detailHtml += '</ul></div>';
+      }
+
+      detailHtml += '</div>';
+
+      // Flujo
+      if (act.flujo) {
+        detailHtml += `<div style="margin-top:0.5rem;padding:0.5rem 0.7rem;background:rgba(255,255,255,0.02);border-radius:5px;border:1px solid var(--border)">
+          <div class="db-title" style="margin-bottom:0.3rem">→ Flujo</div>
+          ${act.flujo.map(f => `<div style="font-size:0.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace">${f}</div>`).join('')}
+        </div>`;
+      }
+
+      // Refs
+      if (act.refs) {
+        detailHtml += `<div style="margin-top:0.4rem;display:flex;gap:0.3rem;flex-wrap:wrap">`;
+        act.refs.forEach(r => {
+          detailHtml += `<span style="font-family:'JetBrains Mono',monospace;font-size:0.52rem;padding:0.12rem 0.4rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:3px;color:var(--muted)">${r}</span>`;
+        });
+        detailHtml += '</div>';
+      }
+    }
+
+    actsHtml += `
+      <div class="act-card" id="act-${act.id}">
+        <div class="act-header" onclick="toggleDetail('${act.id}')">
+          <div class="act-stripe" style="background:${act.color}"></div>
+          <div class="act-main">
+            <div class="act-top">
+              <span class="act-date">${act.date}</span>
+              <span class="act-title">${act.title}</span>
+            </div>
+            <div class="act-actors">${actorTagsHtml}</div>
+          </div>
+          <div class="act-toggle" id="toggle-${act.id}">▸</div>
+        </div>
+        <div class="act-detail" id="detail-${act.id}">
+          ${detailHtml}
+        </div>
+      </div>
+    `;
+  });
+
+  sec.innerHTML = `
+    <div class="stage-header" style="border-color:${stage.color}40">
+      <span class="stage-num" style="background:${stage.color}20;color:${stage.color}">${stage.num}</span>
+      <span class="stage-title">${stage.title}</span>
+      <span class="stage-period">${stage.period}</span>
+    </div>
+    <div class="activity-grid">${actsHtml}</div>
+  `;
+  content.appendChild(sec);
+});
+
+// Toggle detail
+function toggleDetail(id) {
+  const det = document.getElementById('detail-' + id);
+  const tog = document.getElementById('toggle-' + id);
+  if (det.classList.contains('open')) {
+    det.classList.remove('open');
+    tog.textContent = '▸';
+  } else {
+    det.classList.add('open');
+    tog.textContent = '▾';
+  }
+}
+
+// Intersection observer for sidebar highlight
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id.replace('stage-', '');
+      document.querySelectorAll('.sidebar-stage').forEach(s => s.classList.remove('active'));
+      const sb = document.getElementById('sb-' + id);
+      if (sb) sb.classList.add('active');
+    }
+  });
+}, {threshold: 0.3});
+
+stages.forEach(s => {
+  const el = document.getElementById('stage-' + s.id);
+  if (el) observer.observe(el);
+});
+</script>
+</body>
+</html>
